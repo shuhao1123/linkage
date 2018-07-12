@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="http://libs.baidu.com/jquery/1.9.0/jquery.js" type="text/javascript"></script>
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        
+        ul {
+            list-style-type: none;
+        }
+        
+        input {
+            outline: none;
+        }
+        
+        nav {
+            width: 80%;
+            height: 30px;
+            margin: 50px auto;
+        }
+        
+        .nav_main1 {
+            width: 160px;
+            height: 30px;
+            position: relative;
+            display: inline-block
+        }
+        
+        .nav_main2 {
+            width: 160px;
+            height: 30px;
+            position: relative;
+            left: 20px;
+            display: inline-block;
+        }
+        
+        .nav_main3 {
+            width: 160px;
+            height: 30px;
+            position: relative;
+            left: 40px;
+            display: inline-block;
+        }
+        
+        .nav_main4 {
+            width: 160px;
+            height: 30px;
+            position: relative;
+            left: 60px;
+            display: inline-block;
+        }
+        
+        .nav_input1,
+        .nav_input2,
+        .nav_input3,
+        .nav_input4 {
+            position: relative;
+            width: 160px;
+            height: 28px;
+            border: 1px solid #ddd;
+            /* overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap; */
+        }
+        
+        .nav_input1 input,
+        .nav_input2 input,
+        .nav_input3 input,
+        .nav_input4 input {
+            width: 160px;
+            height: 28px;
+            text-indent: 5px;
+            border: none;
+        }
+        
+        .nav_content1,
+        .nav_content2,
+        .nav_content3,
+        .nav_content4 {
+            width: 160px;
+            border: 1px solid #ddd;
+            border-top: none;
+            height: auto;
+            max-height: 270px;
+            position: absolute;
+            display: none;
+            overflow-y: scroll;
+            text-indent: 5px;
+            line-height: 30px;
+            padding: 5px 0;
+        }
+        
+        .nav_content1 ul li,
+        .nav_content2 ul li,
+        .nav_content3 ul li,
+        .nav_content4 ul li {
+            cursor: pointer;
+            font-size: 12px;
+            /* overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap; */
+        }
+        
+        .nav_content1 ul li:hover,
+        .nav_content2 ul li:hover,
+        .nav_content3 ul li:hover,
+        .nav_content4 ul li:hover {
+            background: #eee;
+        }
+        /*下拉箭头 */
+        
+        .triangle2 {
+            position: absolute;
+            right: 5px;
+            top: 12px;
+            width: 0px;
+            height: 10px;
+            border: 6px solid;
+            border-color: #aaa transparent transparent transparent;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="nav_main1">
+            <div class="nav_input1"><input type="text" value="" placeholder="全部" readonly> <span class="triangle2"></span></div>
+            <div class="nav_content1">
+                <ul>
+                </ul>
+            </div>
+        </div>
+
+        <div class="nav_main2">
+            <div class="nav_input2"><input type="text" value="" placeholder="全部" readonly> <span class="triangle2"></span></div>
+            <div class="nav_content2">
+                <ul>
+                </ul>
+            </div>
+        </div>
+
+        <div class="nav_main3">
+            <div class="nav_input3"><input type="text" value="" placeholder="全部" readonly> <span class="triangle2"></span></div>
+            <div class="nav_content3">
+                <ul>
+                </ul>
+            </div>
+        </div>
+
+
+        <div class="nav_main4">
+            <div class="nav_input4"><input type="text" value="" placeholder="全部" readonly> <span class="triangle2"></span></div>
+            <div class="nav_content4">
+                <ul>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <script>
+        function linkage(p_cid, index) {
+            $.ajax({
+                url: 'http://192.168.3.109:8000/industry/category/',
+                type: 'GET',
+                dataType: 'JSON',
+                async: false,
+                data: {
+                    "p_cid": p_cid
+                },
+                success: function(data) {
+                    console.log(data)
+                    var item = '';
+                    // ul li 里面的文本溢出
+                    for (var i = 0; i < data.length; i++) {
+                        if (data[i].name.length > 11) {
+                            item += '<li title="' + data[i].name + '" cid="' + data[i].cid + '" is_parent="' + data[i].is_parent + '">' + data[i].name.slice(0, 11) + '...</li>'
+                        } else {
+                            item += '<li title="' + data[i].name + '" cid="' + data[i].cid + '" is_parent="' + data[i].is_parent + '">' + data[i].name + '</li>'
+                        }
+                    }
+                    var nav_content = '.nav_content' + index;
+                    $(nav_content).find('ul').html(item);
+                }
+            })
+        }
+
+        var isFirst = true;
+        $('.nav_input1').click(function() {
+            $('.nav_content4').hide();
+            $('.nav_content3').hide();
+            $('.nav_content2').hide();
+            $('.nav_content1').toggle();
+            if (isFirst) {
+                linkage(0, 1)
+                $('.nav_content1 ul li').click(function() {
+                    $('.nav_input2').find('input').val('-请选择-')
+                    $('.nav_input1').find('input').val($(this).html());
+                    $('.nav_content1').hide();
+                    linkage($(this).attr('cid'), 2);
+                    if ($(this).attr('is_parent') == 1) {
+                        $('.nav_input2').find('input').val('-请选择-')
+                        $('.nav_input3').find('input').val('-请选择-')
+                        $('.nav_input4').find('input').val('-请选择-')
+                        $('.nav_content3 ul').html('');
+                        $('.nav_content4 ul').html('');
+                    } else {
+                        $('.nav_input2').find('input').val('-暂无数据-')
+                        $('.nav_input3').find('input').val('-暂无数据-');
+                        $('.nav_input4').find('input').val('全部')
+                        $('.nav_content3 ul').html('');
+                        $('.nav_content4 ul').html('');
+                    }
+                })
+                isFirst = false;
+            }
+        })
+        $('.nav_input2').click(function() {
+            if ($('.nav_content2 ul li').length > 0) {
+                $('.nav_content4').hide();
+                $('.nav_content3').hide();
+                $('.nav_content1').hide();
+                $('.nav_content2').toggle();
+                $('.nav_content2 ul li').click(function() {
+                    $('.nav_input2').find('input').val($(this).html());
+                    $('.nav_content2').hide();
+                    linkage($(this).attr('cid'), 3);
+                    if ($(this).attr('is_parent') == 1) {
+                        $('.nav_input3').find('input').val('-请选择-')
+                        $('.nav_input4').find('input').val('-请选择-')
+                        $('.nav_content4 ul').html('');
+                    } else {
+                        $('.nav_input3').find('input').val('-暂无数据-');
+                        $('.nav_input4').find('input').val('全部')
+                        $('.nav_content4 ul').html('');
+                    }
+                })
+            }
+        })
+        $('.nav_input3').click(function() {
+            if ($('.nav_content3 ul li').length > 0) {
+                $('.nav_content4').hide();
+                $('.nav_content2').hide();
+                $('.nav_content1').hide();
+                $('.nav_content3').toggle();
+                $('.nav_content3 ul li').click(function() {
+                    $('.nav_input3').find('input').val($(this).html());
+                    $('.nav_content3').hide();
+                    linkage($(this).attr('cid'), 4)
+                    if ($(this).attr('is_parent') == 1) {
+                        $('.nav_input4').find('input').val('-请选择-')
+                    } else {
+                        $('.nav_input4').find('input').val('-暂无数据-')
+                    }
+                })
+            }
+        })
+        $('.nav_input4').click(function() {
+            if ($('.nav_content4 ul li').length > 0) {
+                $('.nav_content4').toggle();
+                $('.nav_content3').hide();
+                $('.nav_content2').hide();
+                $('.nav_content1').hide();
+                $('.nav_content4 ul li').click(function() {
+                    $('.nav_input4').find('input').val($(this).html());
+                    $('.nav_content4').hide();
+                })
+            }
+        })
+
+
+    </script>
+</body>
+
+</html>
